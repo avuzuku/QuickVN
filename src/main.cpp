@@ -1,10 +1,10 @@
-#include "Engine.hpp"
+#include "core/Engine.hpp"
 #include <iostream>
 
 int main() {
     Engine engine;
     if (!engine.init()) {
-        std::cerr << "Initialization failed." << std::endl;
+        std::cerr << "Application initialization failed." << std::endl;
         return -1;
     }
     engine.run();

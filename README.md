@@ -8,11 +8,13 @@ Unlike browser-based wrappers (e.g., Electron, NW.js) or heavyweight general-pur
 
 ## ✨ Features
 
-- 🚀 **Ultra-lightweight Footprint**: Consumes only ~167 MB of RAM and ~5% of a single CPU core under active rendering.
+- 🚀 **Ultra-lightweight Footprint**: Consumes only ~187 MB of RAM and ~5% of a single CPU core under active rendering.
 - 📜 **Modern JavaScript Scripting**: Scenarios are authored in clean ES2020 JavaScript without requiring C++ recompilation.
+- 🔀 **Interactive Choices & Branching**: Dynamic on-screen choice buttons with JavaScript callback closures.
+- 🎵 **Integrated Audio System**: Looping background music streaming (`sf::Music`) and concurrent sound effects (`sf::Sound`).
+- 🧩 **Modular Architecture**: Decoupled engine design cleanly separated into `core`, `graphics`, `audio`, and `script` subsystems.
 - 🎨 **Modern Tech Stack**: Native C++17 utilizing modern **SFML 3** event models and memory semantics.
 - 📦 **Self-Contained Builds**: Integrated CMake targets automatically sync `assets/` and `scripts/` directories adjacent to the output binary.
-- ⚡ **Linear Execution Model**: A command-queue architecture allows scripts to run synchronously at startup, building an execution pipeline that the C++ loop handles frame-by-frame.
 
 ---
 
@@ -60,19 +62,36 @@ yay -S quickjs
 
 ```text
 QuickVN/
-├── CMakeLists.txt        # Build system configuration
-├── LICENSE               # MIT License
-├── README.md             # Project documentation
-├── assets/               # Fonts, backgrounds, and character sprites
+├── CMakeLists.txt              # Build system configuration
+├── LICENSE                     # MIT License
+├── README.md                   # Project documentation
+├── assets/                     # Fonts, audio, backgrounds, and sprites
 │   ├── font.ttf
+│   ├── music_main.wav
+│   ├── bell.wav
+│   ├── click.wav
 │   ├── bg_school.png
-│   ├── bg_room.png
-│   └── character.png
-├── scripts/              # Scenario scripts
+│   ├── bg_classroom.png
+│   ├── bg_rooftop.png
+│   ├── alice_normal.png
+│   ├── alice_happy.png
+│   └── alice_surprised.png
+├── scripts/                    # Scenario scripts
 │   └── main.js
-└── src/                  # Engine source code
-    ├── Engine.cpp
-    ├── Engine.hpp
+└── src/                        # Modular source code
+    ├── audio/
+    │   ├── AudioManager.hpp
+    │   └── AudioManager.cpp
+    ├── core/
+    │   ├── Command.hpp
+    │   ├── Engine.hpp
+    │   └── Engine.cpp
+    ├── graphics/
+    │   ├── Scene.hpp
+    │   └── Scene.cpp
+    ├── script/
+    │   ├── ScriptManager.hpp
+    │   └── ScriptManager.cpp
     └── main.cpp
 ```
 
@@ -83,31 +102,55 @@ QuickVN/
 All scenario logic is written in `scripts/main.js`. The engine exposes a global `engine` object to the JavaScript runtime:
 
 ```javascript
-// Display scene backgrounds and character sprites
+// Start background music (looping) and setup the scene
+engine.playMusic("assets/music_main.wav", true);
 engine.showBackground("assets/bg_school.png");
-engine.showCharacter("assets/character.png");
+engine.showCharacter("assets/alice_normal.png");
 
-// Dialogue line (speaker, text)
-engine.say("Alice", "Hello! Welcome to QuickVN.");
-engine.say("Alice", "This visual novel engine is built with C++ and QuickJS.");
-engine.say("Alice", "All scripting is handled via embedded JavaScript.");
+// Play audio effects
+engine.playSound("assets/bell.wav");
 
-// Transition to another location
-engine.showBackground("assets/bg_room.png");
-engine.say("Alice", "Location change completed successfully!");
+engine.say("Alice", "Good morning! The morning bell just rang.");
+engine.say("Alice", "Where should we go right now?");
+
+// Interactive branching choices
+engine.showChoices([
+    "Go inside the Classroom",
+    "Sneak onto the Rooftop",
+    "Skip class and head Home"
+], (choice) => {
+    engine.playSound("assets/click.wav");
+
+    if (choice === 0) {
+        engine.showBackground("assets/bg_classroom.png");
+        engine.showCharacter("assets/alice_happy.png");
+        engine.say("Alice", "Let's review our notes near the window.");
+    } else if (choice === 1) {
+        engine.showBackground("assets/bg_rooftop.png");
+        engine.showCharacter("assets/alice_surprised.png");
+        engine.say("Alice", "The rooftop?! The view here is incredible.");
+    } else {
+        engine.stopMusic();
+        engine.showCharacter("assets/alice_surprised.png");
+        engine.say("Alice", "Leaving school already? Alright, adventure time!");
+    }
+
+    engine.say("Alice", "Branch execution finished.");
+});
 ```
 
 ### Controls
 
-- **Left Mouse Click / Space / Enter**: Advance to the next dialogue line or trigger the next action.
+- **Left Mouse Click / Space / Enter**: Advance dialogue.
+- **Mouse Hover & Click**: Highlight and select on-screen branching options.
 - **Escape / Close Window**: Exit the application cleanly.
 
 ---
 
 ## 🗺 Roadmap
 
-- [ ] **SFML Audio Integration**: Background music (`sf::Music`) and sound effects (`sf::Sound`).
-- [ ] **Interactive Choices**: Branching story choices using JavaScript callbacks.
+- [x] **SFML Audio Integration**: Background music streaming (`sf::Music`) and sound effects (`sf::Sound`).
+- [x] **Interactive Choices**: Branching story choices using JavaScript callbacks.
 - [ ] **Visual Transitions**: Sprite alpha fading and position tweening.
 - [ ] **Typewriter Text Effect**: Character-by-character text appearance with skip support.
 - [ ] **State Serialization**: Save/Load system leveraging `JSON.stringify` on the JS runtime.
@@ -117,4 +160,4 @@ engine.say("Alice", "Location change completed successfully!");
 
 ## 📜 License
 
-Distributed under the [MIT](LICENSE) License.
+Distributed under the [MIT](LICENSE) License. Copyright (c) 2026 **avuzuku**.

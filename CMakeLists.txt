@@ -4,8 +4,8 @@ project(QuickVN VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find SFML 3 components
-find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System)
+# Find SFML 3 components (including Audio)
+find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio)
 
 # Find QuickJS include directory and library
 find_path(QUICKJS_INCLUDE_DIR 
@@ -27,13 +27,22 @@ endif()
 message(STATUS "Found QuickJS Include: ${QUICKJS_INCLUDE_DIR}")
 message(STATUS "Found QuickJS Library: ${QUICKJS_LIBRARY}")
 
+# Executable sources
 add_executable(quickjs_vn
     src/main.cpp
-    src/Engine.cpp
-    src/Engine.hpp
+    src/core/Command.hpp
+    src/core/Engine.hpp
+    src/core/Engine.cpp
+    src/graphics/Scene.hpp
+    src/graphics/Scene.cpp
+    src/audio/AudioManager.hpp
+    src/audio/AudioManager.cpp
+    src/script/ScriptManager.hpp
+    src/script/ScriptManager.cpp
 )
 
 target_include_directories(quickjs_vn PRIVATE 
+    src
     ${QUICKJS_INCLUDE_DIR}
 )
 
@@ -41,6 +50,7 @@ target_link_libraries(quickjs_vn PRIVATE
     SFML::Graphics
     SFML::Window
     SFML::System
+    SFML::Audio
     ${QUICKJS_LIBRARY}
     m
     dl
