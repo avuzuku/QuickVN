@@ -9,14 +9,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QVN_PAK_KEY "quickvn-default-secret-key-2026" CACHE STRING "")
 set(QVN_BUILD_STUDIO ON CACHE BOOL "")
 
-find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio)
+find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio OPTIONAL_COMPONENTS Main)
 find_program(CARGO_EXECUTABLE cargo REQUIRED)
 
 find_path(QUICKJS_INCLUDE_DIR
     NAMES quickjs.h
     HINTS
-        ${QUICKJS_ROOT}/include
-        $ENV{QUICKJS_ROOT}/include
+        ${QUICKJS_ROOT}/include$ENV{QUICKJS_ROOT}/include
     PATHS
         /usr/include
         /usr/local/include
@@ -27,8 +26,7 @@ find_path(QUICKJS_INCLUDE_DIR
 find_library(QUICKJS_LIBRARY
     NAMES quickjs qjs libquickjs
     HINTS
-        ${QUICKJS_ROOT}/lib
-        $ENV{QUICKJS_ROOT}/lib
+        ${QUICKJS_ROOT}/lib$ENV{QUICKJS_ROOT}/lib
     PATHS
         /usr/lib
         /usr/local/lib
@@ -103,7 +101,7 @@ add_custom_target(quickvn_rust_build DEPENDS "${RUST_CORE_LIB}")
 
 set(QUICKVN_PLATFORM_LIBS)
 if(WIN32)
-    list(APPEND QUICKVN_PLATFORM_LIBS ws2_32 userenv bcrypt ntdll advapi32)
+    list(APPEND QUICKVN_PLATFORM_LIBS ws2_32 userenv bcrypt ntdll advapi32 synchronization)
 elseif(ANDROID)
     list(APPEND QUICKVN_PLATFORM_LIBS android log dl m)
 elseif(IOS)
