@@ -1,0 +1,12 @@
+[package]
+name = "quickvn_core"
+version = "2.0.0"
+edition = "2021"
+
+[lib]
+name = "quickvn_core"
+crate-type = ["staticlib"]
+
+[profile.release]
+opt-level = 3
+lto = true

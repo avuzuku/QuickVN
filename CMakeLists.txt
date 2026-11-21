@@ -1,48 +1,153 @@
-cmake_minimum_required(VERSION 3.15)
-project(QuickVN VERSION 1.0.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.18)
+project(QuickVN VERSION 2.0.0 LANGUAGES C CXX)
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find SFML 3 components (including Audio)
-find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio)
+set(QVN_PAK_KEY "quickvn-default-secret-key-2026" CACHE STRING "")
+set(QVN_BUILD_STUDIO ON CACHE BOOL "")
 
-# Find QuickJS include directory and library
-find_path(QUICKJS_INCLUDE_DIR 
-    NAMES quickjs.h 
-    PATHS /usr/include /usr/local/include
+find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio)
+find_program(CARGO_EXECUTABLE cargo REQUIRED)
+
+find_path(QUICKJS_INCLUDE_DIR
+    NAMES quickjs.h
+    HINTS
+        ${QUICKJS_ROOT}/include
+        $ENV{QUICKJS_ROOT}/include
+    PATHS
+        /usr/include
+        /usr/local/include
+        /opt/homebrew/include
     PATH_SUFFIXES quickjs
 )
 
-find_library(QUICKJS_LIBRARY 
-    NAMES quickjs qjs
-    PATHS /usr/lib /usr/local/lib
+find_library(QUICKJS_LIBRARY
+    NAMES quickjs qjs libquickjs
+    HINTS
+        ${QUICKJS_ROOT}/lib
+        $ENV{QUICKJS_ROOT}/lib
+    PATHS
+        /usr/lib
+        /usr/local/lib
+        /opt/homebrew/lib
     PATH_SUFFIXES quickjs
 )
 
 if(NOT QUICKJS_INCLUDE_DIR OR NOT QUICKJS_LIBRARY)
-    message(FATAL_ERROR "QuickJS not found! Please ensure 'quickjs' is installed.")
+    message(FATAL_ERROR "QuickJS not found. Set -DQUICKJS_ROOT=/path/to/quickjs")
 endif()
 
-message(STATUS "Found QuickJS Include: ${QUICKJS_INCLUDE_DIR}")
-message(STATUS "Found QuickJS Library: ${QUICKJS_LIBRARY}")
+set(RUST_MANIFEST "${CMAKE_CURRENT_SOURCE_DIR}/rust_core/Cargo.toml")
+set(RUST_TARGET_DIR "${CMAKE_CURRENT_BINARY_DIR}/rust_target")
+set(RUST_CARGO_ARGS build --release --manifest-path "${RUST_MANIFEST}" --target-dir "${RUST_TARGET_DIR}")
+set(RUST_TARGET_TRIPLE "")
 
-# Executable sources
-add_executable(quickjs_vn
-    src/main.cpp
-    src/core/Command.hpp
-    src/core/Engine.hpp
-    src/core/Engine.cpp
-    src/graphics/Scene.hpp
-    src/graphics/Scene.cpp
-    src/audio/AudioManager.hpp
-    src/audio/AudioManager.cpp
-    src/script/ScriptManager.hpp
-    src/script/ScriptManager.cpp
+if(ANDROID)
+    if(ANDROID_ABI STREQUAL "arm64-v8a")
+        set(RUST_TARGET_TRIPLE "aarch64-linux-android")
+    elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
+        set(RUST_TARGET_TRIPLE "armv7-linux-androideabi")
+    elseif(ANDROID_ABI STREQUAL "x86_64")
+        set(RUST_TARGET_TRIPLE "x86_64-linux-android")
+    elseif(ANDROID_ABI STREQUAL "x86")
+        set(RUST_TARGET_TRIPLE "i686-linux-android")
+    endif()
+elseif(IOS)
+    if(CMAKE_OSX_SYSROOT MATCHES "iphonesimulator")
+        if(CMAKE_OSX_ARCHITECTURES MATCHES "x86_64")
+            set(RUST_TARGET_TRIPLE "x86_64-apple-ios")
+        else()
+            set(RUST_TARGET_TRIPLE "aarch64-apple-ios-sim")
+        endif()
+    else()
+        set(RUST_TARGET_TRIPLE "aarch64-apple-ios")
+    endif()
+elseif(APPLE)
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+        set(RUST_TARGET_TRIPLE "x86_64-apple-darwin")
+    elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+        set(RUST_TARGET_TRIPLE "aarch64-apple-darwin")
+    endif()
+elseif(WIN32 AND MINGW AND CMAKE_CROSSCOMPILING)
+    set(RUST_TARGET_TRIPLE "x86_64-pc-windows-gnu")
+endif()
+
+if(RUST_TARGET_TRIPLE)
+    list(APPEND RUST_CARGO_ARGS --target "${RUST_TARGET_TRIPLE}")
+    set(RUST_OUT_DIR "${RUST_TARGET_DIR}/${RUST_TARGET_TRIPLE}/release")
+else()
+    set(RUST_OUT_DIR "${RUST_TARGET_DIR}/release")
+endif()
+
+if(MSVC)
+    set(RUST_CORE_LIB "${RUST_OUT_DIR}/quickvn_core.lib")
+else()
+    set(RUST_CORE_LIB "${RUST_OUT_DIR}/libquickvn_core.a")
+endif()
+
+file(GLOB RUST_CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/rust_core/src/*.rs")
+
+add_custom_command(
+    OUTPUT "${RUST_CORE_LIB}"
+    COMMAND "${CARGO_EXECUTABLE}" ${RUST_CARGO_ARGS}
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/rust_core/Cargo.toml"
+        ${RUST_CORE_SOURCES}
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/rust_core"
 )
 
-target_include_directories(quickjs_vn PRIVATE 
+add_custom_target(quickvn_rust_build DEPENDS "${RUST_CORE_LIB}")
+
+set(QUICKVN_PLATFORM_LIBS)
+if(WIN32)
+    list(APPEND QUICKVN_PLATFORM_LIBS ws2_32 userenv bcrypt ntdll advapi32)
+elseif(ANDROID)
+    list(APPEND QUICKVN_PLATFORM_LIBS android log dl m)
+elseif(IOS)
+    list(APPEND QUICKVN_PLATFORM_LIBS "-framework Foundation" "-framework Security" m)
+elseif(APPLE)
+    list(APPEND QUICKVN_PLATFORM_LIBS "-framework Foundation" "-framework Security" m dl)
+else()
+    list(APPEND QUICKVN_PLATFORM_LIBS m dl pthread)
+endif()
+
+set(QUICKVN_SOURCES
+    src/main.cpp
+    src/core/command.hpp
+    src/core/engine.hpp
+    src/core/engine.cpp
+    src/core/mod_menu.hpp
+    src/core/mod_menu.cpp
+    src/graphics/scene.hpp
+    src/graphics/scene.cpp
+    src/audio/audio.hpp
+    src/audio/audio.cpp
+    src/platform/platform.hpp
+    src/platform/platform.cpp
+    src/ui/ui.hpp
+    src/ui/ui.cpp
+    src/script/qjs_bridge.h
+    src/script/qjs_bridge.c
+    rust_core/include/rust_core.h
+)
+
+if(ANDROID)
+    add_library(quickjs_vn SHARED ${QUICKVN_SOURCES})
+elseif(IOS)
+    add_executable(quickjs_vn MACOSX_BUNDLE ${QUICKVN_SOURCES})
+else()
+    add_executable(quickjs_vn ${QUICKVN_SOURCES})
+endif()
+
+add_dependencies(quickjs_vn quickvn_rust_build)
+target_compile_definitions(quickjs_vn PRIVATE QVN_PAK_KEY="${QVN_PAK_KEY}")
+
+target_include_directories(quickjs_vn PRIVATE
     src
+    rust_core/include
     ${QUICKJS_INCLUDE_DIR}
 )
 
@@ -52,18 +157,33 @@ target_link_libraries(quickjs_vn PRIVATE
     SFML::System
     SFML::Audio
     ${QUICKJS_LIBRARY}
-    m
-    dl
+    "${RUST_CORE_LIB}"
+    ${QUICKVN_PLATFORM_LIBS}
 )
 
-# --- Automatic asset synchronization ---
-add_custom_target(copy_resources ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/assets
-        ${CMAKE_CURRENT_BINARY_DIR}/assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/scripts
-        ${CMAKE_CURRENT_BINARY_DIR}/scripts
-    COMMENT "Synchronizing assets and scripts to build directory..."
-)
-add_dependencies(quickjs_vn copy_resources)
+if((WIN32 OR ANDROID OR IOS) AND TARGET SFML::Main)
+    target_link_libraries(quickjs_vn PRIVATE SFML::Main)
+endif()
+
+if(NOT ANDROID AND NOT IOS AND QVN_BUILD_STUDIO)
+    add_executable(QuickVN_Studio
+        src/tools/launcher_main.cpp
+        src/tools/studio_state.hpp
+        src/tools/studio_ops.cpp
+        src/tools/studio_views.cpp
+        src/ui/ui.hpp
+        src/ui/ui.cpp
+        src/platform/platform.hpp
+        src/platform/platform.cpp
+        rust_core/include/rust_core.h
+    )
+    add_dependencies(QuickVN_Studio quickvn_rust_build)
+    target_include_directories(QuickVN_Studio PRIVATE src rust_core/include)
+    target_link_libraries(QuickVN_Studio PRIVATE
+        SFML::Graphics
+        SFML::Window
+        SFML::System
+        "${RUST_CORE_LIB}"
+        ${QUICKVN_PLATFORM_LIBS}
+    )
+endif()
