@@ -9,6 +9,7 @@
 [![SFML 3](https://img.shields.io/badge/SFML-3.0-green.svg?style=flat-square&logo=sfml)](https://www.sfml-dev.org/)
 [![QuickJS](https://img.shields.io/badge/QuickJS-ES2023-yellow.svg?style=flat-square&logo=javascript)](https://bellard.org/quickjs/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/avuzuku/QuickVN?style=flat-square&label=Release)](https://github.com/avuzuku/QuickVN/releases/latest)
 
 **QuickVN** — нативный 2D-движок визуальных новелл и студия разработки на базе **C++17**, **SFML 3**, **QuickJS** и **Rust**. Пишите сценарии на современном JS DSL или Ren'Py `.rpy`, настраивайте игру через `config.json` или визуальный редактор, управляйте модами прямо внутри игры и экспортируйте зашифрованные сборки под **5 платформ**.
 
@@ -39,6 +40,20 @@
   - Настройка окна, шрифтов, темы, диалогового окна, NVL-режима, кнопок меню, затемнения неактивных персонажей, звуков интерфейса, хоткеев, галереи и достижений без единой правки C++/Rust.
 - **Два языка сценариев (JS DSL + Ren'Py `.rpy`)**:
   - Поддержка выразительного JS DSL и транспиляция скриптов Ren'Py `.rpy` на лету, а также динамическая подстановка `{playerName}` после `input()`.
+
+---
+
+## 📥 Скачать (Готовые релизы)
+
+Готовые сборки **QuickVN Studio** (уже содержащие рантаймы для экспорта под **Linux, Windows, macOS, Android и iOS**) публикуются на странице [**Releases**](https://github.com/avuzuku/QuickVN/releases/latest):
+
+| ОС | Архив | Содержимое |
+|---|---|---|
+| 🐧 **Linux** | `QuickVN_Studio_Linux.tar.gz` | `QuickVN_Studio` + `runtimes/` под 5 ОС + `proj/` |
+| 🪟 **Windows** | `QuickVN_Studio_Windows.zip` | `QuickVN_Studio.exe` + `runtimes/` под 5 ОС + `proj/` |
+| 🍎 **macOS** | `QuickVN_Studio_macOS.tar.gz` | `QuickVN_Studio` + `runtimes/` под 5 ОС + `proj/` |
+
+> **Быстрый запуск на Linux:** `tar -xzf QuickVN_Studio_Linux.tar.gz && ./linux/QuickVN_Studio`
 
 ---
 
@@ -83,9 +98,6 @@ chmod +x tools/build_studio.sh
 ```bash
 ./out/linux/QuickVN_Studio
 ```
-
-### Сборка всех 3 ОС и 5 рантаймов через GitHub Actions
-Запустите workflow `.github/workflows/release.yml` во вкладке **Actions → Run workflow** (или отправьте тег `v*`). CI соберёт готовые архивы Studio для **Linux**, **Windows** и **macOS**, сразу укомплектованные стабами под все **5 платформ** в `runtimes/`.
 
 ---
 

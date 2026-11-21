@@ -9,6 +9,7 @@
 [![SFML 3](https://img.shields.io/badge/SFML-3.0-green.svg?style=flat-square&logo=sfml)](https://www.sfml-dev.org/)
 [![QuickJS](https://img.shields.io/badge/QuickJS-ES2023-yellow.svg?style=flat-square&logo=javascript)](https://bellard.org/quickjs/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/avuzuku/QuickVN?style=flat-square&label=Release)](https://github.com/avuzuku/QuickVN/releases/latest)
 
 **QuickVN** is a native 2D visual novel engine and all-in-one development studio powered by **C++17**, **SFML 3**, **QuickJS**, and **Rust**. Write stories in modern JavaScript DSL or Ren'Py `.rpy` scripts, customize everything through `config.json` or the Studio UI, manage mods directly inside the game, and export encrypted builds for **5 platforms**.
 
@@ -39,6 +40,20 @@
   - Configure window, fonts, themes, dialogue box, NVL mode, choices, transitions, speaker dimming, UI sounds, keybindings, gallery, and achievements without touching C++ or Rust.
 - **Dual Scripting (JS DSL + Ren'Py `.rpy`)**:
   - Write in concise JS DSL (`bg`, `char`, `say`, `choice`, `timedChoice`, `input`, `voice`, `weather`, `nvl`, `camZoom`, `shake`, `flash`, `chapter`, `ending`) or Ren'Py `.rpy` syntax (auto-transpiled by Rust).
+
+---
+
+## 📥 Download (Prebuilt Releases)
+
+Ready-to-use **QuickVN Studio** bundles (including prebuilt runtime stubs for **Linux, Windows, macOS, Android, and iOS**) are published on the [**Releases**](https://github.com/avuzuku/QuickVN/releases/latest) page:
+
+| OS | Archive | Contents |
+|---|---|---|
+| 🐧 **Linux** | `QuickVN_Studio_Linux.tar.gz` | `QuickVN_Studio` + 5-OS `runtimes/` + `proj/` |
+| 🪟 **Windows** | `QuickVN_Studio_Windows.zip` | `QuickVN_Studio.exe` + 5-OS `runtimes/` + `proj/` |
+| 🍎 **macOS** | `QuickVN_Studio_macOS.tar.gz` | `QuickVN_Studio` + 5-OS `runtimes/` + `proj/` |
+
+> **Linux quick start:** `tar -xzf QuickVN_Studio_Linux.tar.gz && ./linux/QuickVN_Studio`
 
 ---
 
@@ -83,9 +98,6 @@ Run Studio:
 ```bash
 ./out/linux/QuickVN_Studio
 ```
-
-### Multi-OS CI Release (3 Desktop Studios + 5 Runtime Stubs)
-Trigger `.github/workflows/release.yml` via **GitHub Actions → Run workflow** (or push a `v*` tag). It builds native `QuickVN_Studio` bundles for **Linux**, **Windows**, and **macOS**, and embeds all **5 runtime stubs** (`linux`, `windows`, `macos`, `android`, `ios`) inside each bundle's `runtimes/` directory.
 
 ---
 

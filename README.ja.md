@@ -9,6 +9,7 @@
 [![SFML 3](https://img.shields.io/badge/SFML-3.0-green.svg?style=flat-square&logo=sfml)](https://www.sfml-dev.org/)
 [![QuickJS](https://img.shields.io/badge/QuickJS-ES2023-yellow.svg?style=flat-square&logo=javascript)](https://bellard.org/quickjs/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/avuzuku/QuickVN?style=flat-square&label=Release)](https://github.com/avuzuku/QuickVN/releases/latest)
 
 **QuickVN** は **C++17**・**SFML 3**・**QuickJS**・**Rust** で構築された軽量・高速なネイティブ2Dビジュアルノベルエンジン＆開発スタジオです。モダンな JavaScript DSL または Ren'Py `.rpy` 形式でシナリオを記述し、`config.json` やスタジオGUIからすべてを設定し、ゲーム内蔵のMODマネージャーと **5OS向け暗号化エクスポート** を利用できます。
 
@@ -39,6 +40,20 @@
   - ウィンドウ、フォント、テーマ、ダイアログ枠、NVLモード、メニュー項目、非話者の減光、UI効果音、キー配置、ギャラリー、実績をC++/Rust改変なしでカスタマイズ可能。
 - **デュアルスクリプト対応（JS DSL + Ren'Py `.rpy`）**:
   - 簡潔な JS DSL と Rust による `.rpy` 自動トランスパイル、さらに `input()` 後の `{playerName}` 動的展開に対応。
+
+---
+
+## 📥 ダウンロード（リリース版）
+
+ビルド済みの **QuickVN Studio** バンドル（**Linux / Windows / macOS / Android / iOS** 用のランタイムスタブ同梱）は [**Releases**](https://github.com/avuzuku/QuickVN/releases/latest) ページからダウンロードできます：
+
+| OS | アーカイブ | 内容 |
+|---|---|---|
+| 🐧 **Linux** | `QuickVN_Studio_Linux.tar.gz` | `QuickVN_Studio` + 5OS対応 `runtimes/` + `proj/` |
+| 🪟 **Windows** | `QuickVN_Studio_Windows.zip` | `QuickVN_Studio.exe` + 5OS対応 `runtimes/` + `proj/` |
+| 🍎 **macOS** | `QuickVN_Studio_macOS.tar.gz` | `QuickVN_Studio` + 5OS対応 `runtimes/` + `proj/` |
+
+> **Linux クイック起動:** `tar -xzf QuickVN_Studio_Linux.tar.gz && ./linux/QuickVN_Studio`
 
 ---
 
@@ -83,9 +98,6 @@ chmod +x tools/build_studio.sh
 ```bash
 ./out/linux/QuickVN_Studio
 ```
-
-### GitHub Actions による 3OS Studio + 5OS ランタイム一括ビルド
-`.github/workflows/release.yml` を **Actions → Run workflow** から実行（または `v*` タグをプッシュ）すると、**Linux / Windows / macOS** 向けの Studio と、全 **5OS** のランタイムスタブ（`runtimes/`）を含む完成パッケージが自動生成されます。
 
 ---
 
