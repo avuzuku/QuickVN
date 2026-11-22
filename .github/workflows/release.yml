@@ -74,6 +74,16 @@ jobs:
         run: |
           cmake -S . -B /tmp/qvn_win -G Ninja -DCMAKE_BUILD_TYPE=Release -DSFML_STATIC_LIBRARIES=TRUE -DCMAKE_PREFIX_PATH=/tmp/deps -DQUICKJS_ROOT=/tmp/deps
           cmake --build /tmp/qvn_win -j$(nproc)
+      - name: Verify no MinGW DLL dependencies
+        run: |
+          for exe in /tmp/qvn_win/QuickVN_Studio.exe /tmp/qvn_win/quickjs_vn.exe; do
+            echo "=== Dependencies of ${exe} ==="
+            objdump -p "${exe}" | grep "DLL Name:"
+            if objdump -p "${exe}" | grep -iE "DLL Name:.*(libstdc\+\+|libgcc|libwinpthread)"; then
+              echo "ERROR: ${exe} still depends on MinGW runtime DLLs!"
+              exit 1
+            fi
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: bin-windows
