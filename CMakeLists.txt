@@ -19,7 +19,8 @@ find_program(CARGO_EXECUTABLE cargo REQUIRED)
 find_path(QUICKJS_INCLUDE_DIR
     NAMES quickjs.h
     HINTS
-        ${QUICKJS_ROOT}/include$ENV{QUICKJS_ROOT}/include
+        "${QUICKJS_ROOT}/include"
+        "$ENV{QUICKJS_ROOT}/include"
     PATHS
         /usr/include
         /usr/local/include
@@ -30,7 +31,8 @@ find_path(QUICKJS_INCLUDE_DIR
 find_library(QUICKJS_LIBRARY
     NAMES quickjs qjs libquickjs
     HINTS
-        ${QUICKJS_ROOT}/lib$ENV{QUICKJS_ROOT}/lib
+        "${QUICKJS_ROOT}/lib"
+        "$ENV{QUICKJS_ROOT}/lib"
     PATHS
         /usr/lib
         /usr/local/lib
@@ -167,6 +169,14 @@ if((WIN32 OR ANDROID OR IOS) AND TARGET SFML::Main)
     target_link_libraries(quickjs_vn PRIVATE SFML::Main)
 endif()
 
+if(MINGW)
+    target_link_options(quickjs_vn PRIVATE
+        -static
+        -static-libgcc
+        -static-libstdc++
+    )
+endif()
+
 if(NOT ANDROID AND NOT IOS AND QVN_BUILD_STUDIO)
     add_executable(QuickVN_Studio
         src/tools/launcher_main.cpp
@@ -188,4 +198,11 @@ if(NOT ANDROID AND NOT IOS AND QVN_BUILD_STUDIO)
         "${RUST_CORE_LIB}"
         ${QUICKVN_PLATFORM_LIBS}
     )
+    if(MINGW)
+        target_link_options(QuickVN_Studio PRIVATE
+            -static
+            -static-libgcc
+            -static-libstdc++
+        )
+    endif()
 endif()
