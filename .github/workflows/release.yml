@@ -146,7 +146,8 @@ jobs:
           cmake -S . -B /tmp/qvn_android -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="${NDK}/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-${API} \
-            -DCMAKE_BUILD_TYPE=Release -DQVN_BUILD_STUDIO=OFF -DSFML_STATIC_LIBRARIES=TRUE \
+            -DCMAKE_BUILD_TYPE=Release -DQVN_BUILD_STUDIO=OFF \
+            -DSFML_DIR="${NDK}/sources/third_party/sfml/lib/arm64-v8a/cmake/SFML" \
             -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
             -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH \
             -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH \

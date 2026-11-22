@@ -9,7 +9,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QVN_PAK_KEY "quickvn-default-secret-key-2026" CACHE STRING "")
 set(QVN_BUILD_STUDIO ON CACHE BOOL "")
 
-find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio OPTIONAL_COMPONENTS Main)
+if(WIN32 OR ANDROID OR IOS)
+    find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio Main)
+else()
+    find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio)
+endif()
 find_program(CARGO_EXECUTABLE cargo REQUIRED)
 
 find_path(QUICKJS_INCLUDE_DIR
