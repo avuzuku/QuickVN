@@ -130,7 +130,7 @@ jobs:
           AR_BIN="${NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
           export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="${CC_BIN}"
           git clone --depth 1 https://github.com/bellard/quickjs.git /tmp/quickjs
-          make -C /tmp/quickjs CC="${CC_BIN}" AR="${AR_BIN}" libquickjs.a -j$(nproc)
+          make -C /tmp/quickjs CC="${CC_BIN} -fPIC" AR="${AR_BIN}" libquickjs.a -j$(nproc)
           mkdir -p /tmp/deps_android/include/quickjs /tmp/deps_android/lib
           cp /tmp/quickjs/quickjs.h /tmp/quickjs/quickjs-libc.h /tmp/deps_android/include/quickjs/
           cp /tmp/quickjs/libquickjs.a /tmp/deps_android/lib/
